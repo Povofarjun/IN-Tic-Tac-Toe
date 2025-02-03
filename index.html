@@ -1,9 +1,9 @@
-<!-- index.html - Infinity Tic Tac Toe (Enhanced UI/UX with Canvas, Win Logic & Infinity Mode) -->
+<!-- index.html - Infinity Tic Tac Toe (Enhanced UI/UX with Canvas, Win Detection, AI Mode, and Mode Selection) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Infinity Tic Tac Toe - Enhanced UI with Win Detection</title>
+  <title>Infinity Tic Tac Toe - Enhanced UI with AI Mode</title>
   <style>
     /* Enhanced styling inspired by provided UI/UX references */
     body {
@@ -53,28 +53,75 @@
     #resetButton:hover {
       background: #4452c4;
     }
+    /* Modal overlay for mode selection */
+    #modeSelection {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    #modeSelectionContent {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      color: #333;
+    }
+    #modeSelectionContent h2 {
+      margin-bottom: 20px;
+    }
+    #modeSelectionContent button {
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      background: #5563DE;
+      color: #fff;
+      transition: background 0.3s ease;
+    }
+    #modeSelectionContent button:hover {
+      background: #4452c4;
+    }
   </style>
 </head>
 <body>
   <h1>Infinity Tic Tac Toe</h1>
   <canvas id="gameCanvas" width="300" height="300"></canvas>
   <div id="status">Current Player: X</div>
-  <button id="resetButton">Reset Game</button>
+  <button id="resetButton" style="display:none;">Reset Game</button>
+
+  <!-- Mode selection modal -->
+  <div id="modeSelection">
+    <div id="modeSelectionContent">
+      <h2>Select Game Mode</h2>
+      <button id="btnPVP">Play with Player</button>
+      <button id="btnAI">Play with AI</button>
+    </div>
+  </div>
+
   <script>
-    // Enhanced Canvas Game Code for Infinity Tic Tac Toe with Win Detection
+    // Enhanced Canvas Game Code for Infinity Tic Tac Toe with Win Detection, AI Mode, and Mode Selection
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     const statusDiv = document.getElementById('status');
     const resetButton = document.getElementById('resetButton');
+    const modeSelection = document.getElementById('modeSelection');
+    const modeSelectionContent = document.getElementById('modeSelectionContent');
 
-    // Game state:
-    // board: array of 9 cells, each cell is either null or { player: 'X'|'O', faded: boolean }
-    // movesX/movesO: track the order of moves for each player to manage fading logic.
-    let board = Array(9).fill(null);
+    let board = Array(9).fill(null); // Each cell: { player: 'X'|'O', faded: boolean }
     let movesX = [];
     let movesO = [];
     let currentPlayer = 'X';
-    let gameOver = false; // When true, further moves are disabled
+    let gameOver = false;
+    let gameMode = null; // "pvp" or "ai"
 
     // Winning combinations for 3x3 Tic Tac Toe
     const winCombinations = [
@@ -83,7 +130,7 @@
       [0, 4, 8], [2, 4, 6]             // Diagonals
     ];
 
-    // Check for a win; returns 'X' or 'O' if win condition is met, otherwise null.
+    // Check for win; returns 'X' or 'O' if win condition is met, otherwise null.
     function checkWin() {
       for (const combination of winCombinations) {
         const [a, b, c] = combination;
@@ -96,7 +143,7 @@
       return null;
     }
 
-    // Draw the grid with enhanced visual style
+    // Draw grid with enhanced visual style
     function drawGrid() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.lineWidth = 4;
@@ -159,7 +206,32 @@
       return row * 3 + col;
     }
 
-    // Process a move when a cell is clicked
+    // Get list of valid moves for AI: empty cells or faded opponent cells
+    function getValidMoves() {
+      let valid = [];
+      for (let i = 0; i < 9; i++) {
+        if (board[i] === null) {
+          valid.push(i);
+        } else if (board[i] && board[i].faded && board[i].player !== currentPlayer) {
+          valid.push(i);
+        }
+      }
+      return valid;
+    }
+
+    // AI move: choose a random valid move
+    function aiMove() {
+      if (gameOver) return;
+      const validMoves = getValidMoves();
+      if (validMoves.length === 0) return;
+      const randomIndex = Math.floor(Math.random() * validMoves.length);
+      const move = validMoves[randomIndex];
+      setTimeout(() => {
+        makeMove(move);
+      }, 500);
+    }
+
+    // Process a move when a cell is clicked or chosen by AI
     function makeMove(index) {
       if (gameOver) return; // Disable moves if game is over
 
@@ -168,28 +240,28 @@
         board[index] = { player: currentPlayer, faded: false };
         if (currentPlayer === 'X') {
           movesX.push(index);
-          // Fade the oldest move on the 4th move for player X
-          if (movesX.length === 4) {
+          // Fade the oldest move on the 3rd move for player X
+          if (movesX.length === 3) {
             const fadeIndex = movesX[0];
             if (board[fadeIndex]) board[fadeIndex].faded = true;
           }
         } else {
           movesO.push(index);
-          // Fade the oldest move on the 4th move for player O
-          if (movesO.length === 4) {
+          // Fade the oldest move on the 3rd move for player O
+          if (movesO.length === 3) {
             const fadeIndex = movesO[0];
             if (board[fadeIndex]) board[fadeIndex].faded = true;
           }
         }
         // Remove the opponent's faded move if conditions are met
-        if (currentPlayer === 'X' && movesX.length === 4 && movesO.length >= 4) {
+        if (currentPlayer === 'X' && movesX.length === 3 && movesO.length >= 3) {
           const fadeIndex = movesO[0];
           if (board[fadeIndex] && board[fadeIndex].faded) {
             board[fadeIndex] = null;
             movesO.shift();
           }
         }
-        if (currentPlayer === 'O' && movesO.length === 4 && movesX.length >= 4) {
+        if (currentPlayer === 'O' && movesO.length === 3 && movesX.length >= 3) {
           const fadeIndex = movesX[0];
           if (board[fadeIndex] && board[fadeIndex].faded) {
             board[fadeIndex] = null;
@@ -214,13 +286,13 @@
           }
           if (currentPlayer === 'X') {
             movesX.push(index);
-            if (movesX.length === 4) {
+            if (movesX.length === 3) {
               const fadeIndex = movesX[0];
               if (board[fadeIndex]) board[fadeIndex].faded = true;
             }
           } else {
             movesO.push(index);
-            if (movesO.length === 4) {
+            if (movesO.length === 3) {
               const fadeIndex = movesO[0];
               if (board[fadeIndex]) board[fadeIndex].faded = true;
             }
@@ -236,6 +308,14 @@
       if (winner) {
         statusDiv.textContent = `Player ${winner} wins!`;
         gameOver = true;
+        setTimeout(() => {
+          showModeSelection(`Player ${winner} wins!<br>Select Game Mode:`);
+        }, 1000);
+      } else {
+        // If in AI mode and it's AI's turn, trigger AI move
+        if (!gameOver && gameMode === 'ai' && currentPlayer === 'O') {
+          aiMove();
+        }
       }
     }
 
@@ -250,15 +330,44 @@
       updateCanvas();
     }
 
-    // Event listeners for canvas clicks and reset button
+    // Show mode selection modal with a custom message (if provided)
+    function showModeSelection(message) {
+      modeSelectionContent.innerHTML = `<h2>${message || 'Select Game Mode'}</h2>
+        <button id="btnPVP">Play with Player</button>
+        <button id="btnAI">Play with AI</button>`;
+      modeSelection.style.display = 'flex';
+      document.getElementById('btnPVP').addEventListener('click', () => {
+        gameMode = 'pvp';
+        hideModeSelection();
+        resetGame();
+      });
+      document.getElementById('btnAI').addEventListener('click', () => {
+        gameMode = 'ai';
+        hideModeSelection();
+        resetGame();
+      });
+    }
+
+    function hideModeSelection() {
+      modeSelection.style.display = 'none';
+    }
+
+    // Handle canvas click events for human moves
     canvas.addEventListener('click', (e) => {
+      // In AI mode, only allow human moves when it's human's turn (X)
+      if (gameMode === 'ai' && currentPlayer !== 'X') return;
       const index = getCellFromCoordinates(e.clientX, e.clientY);
       makeMove(index);
     });
+
+    // Hide the reset button (we use modal for restarting)
     resetButton.addEventListener('click', resetGame);
 
     // Initial drawing of the game board
     updateCanvas();
+
+    // Show mode selection modal on page load
+    showModeSelection();
   </script>
 </body>
 </html>

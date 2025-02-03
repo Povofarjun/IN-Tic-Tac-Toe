@@ -1,73 +1,90 @@
-<!-- index.html - Infinity Tic Tac Toe using Canvas (copy-paste ready) -->
+<!-- index.html - Infinity Tic Tac Toe (Enhanced UI/UX with Canvas) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Infinity Tic Tac Toe - Canvas</title>
+  <title>Infinity Tic Tac Toe - Enhanced UI</title>
   <style>
-    /* Basic page and canvas styling */
+    /* Enhanced styling inspired by UI/UX references */
     body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      background: #f2f2f2;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #74ABE2, #5563DE);
       margin: 0;
-      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      color: #fff;
     }
     h1 {
-      margin-top: 20px;
-      color: #333;
+      margin: 20px 0;
+      font-size: 2.5rem;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
     }
     canvas {
       background: #fff;
-      border: 2px solid #333;
-      margin-top: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
       cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    canvas:hover {
+      transform: scale(1.02);
     }
     #status {
       margin-top: 20px;
-      font-size: 20px;
-      color: #333;
+      font-size: 1.5rem;
+      font-weight: bold;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
     }
-    button {
-      margin-top: 10px;
-      padding: 10px 20px;
-      font-size: 16px;
+    #resetButton {
+      margin-top: 15px;
+      padding: 10px 25px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 5px;
+      background: #5563DE;
+      color: #fff;
       cursor: pointer;
+      transition: background 0.3s ease;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    #resetButton:hover {
+      background: #4452c4;
     }
   </style>
 </head>
 <body>
-  <h1>Infinity Tic Tac Toe - Canvas</h1>
+  <h1>Infinity Tic Tac Toe</h1>
   <canvas id="gameCanvas" width="300" height="300"></canvas>
   <div id="status">Current Player: X</div>
   <button id="resetButton">Reset Game</button>
   <script>
-    // Get references to DOM elements and set up canvas context
+    // Enhanced Canvas Game Code for Infinity Tic Tac Toe
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     const statusDiv = document.getElementById('status');
     const resetButton = document.getElementById('resetButton');
 
-    // Game state:
-    // 'board' is an array of 9 cells (3x3 grid), each cell is either null or an object { player: 'X'|'O', faded: boolean }
-    let board = Array(9).fill(null);
-    // Track moves for each player in order
+    // Game state: board stores cell data; movesX/movesO track each player's moves order.
+    let board = Array(9).fill(null); // Each cell: { player: 'X'|'O', faded: boolean }
     let movesX = [];
     let movesO = [];
     let currentPlayer = 'X';
 
-    // Function to draw the board grid
+    // Draw grid with enhanced visual style
     function drawGrid() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 4;
       ctx.strokeStyle = '#333';
       ctx.beginPath();
-      // Draw vertical lines
+      // Vertical lines
       ctx.moveTo(100, 0);
       ctx.lineTo(100, 300);
       ctx.moveTo(200, 0);
       ctx.lineTo(200, 300);
-      // Draw horizontal lines
+      // Horizontal lines
       ctx.moveTo(0, 100);
       ctx.lineTo(300, 100);
       ctx.moveTo(0, 200);
@@ -75,7 +92,7 @@
       ctx.stroke();
     }
 
-    // Function to draw X's and O's on the board
+    // Draw moves with color, shadows, and fade effects
     function drawMoves() {
       for (let i = 0; i < 9; i++) {
         const cell = board[i];
@@ -85,24 +102,29 @@
           const centerX = col * 100 + 50;
           const centerY = row * 100 + 50;
           ctx.save();
-          // Use 50% opacity if the move is faded
           ctx.globalAlpha = cell.faded ? 0.5 : 1.0;
-          ctx.font = '48px Arial';
+          ctx.font = 'bold 48px Segoe UI';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
+          // Shadow for a modern look
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+          ctx.shadowBlur = 4;
+          ctx.shadowOffsetX = 2;
+          ctx.shadowOffsetY = 2;
+          ctx.fillStyle = cell.player === 'X' ? '#E74C3C' : '#2ECC71';
           ctx.fillText(cell.player, centerX, centerY);
           ctx.restore();
         }
       }
     }
 
-    // Update the canvas by redrawing the grid and moves
+    // Update the canvas: draw grid and then moves
     function updateCanvas() {
       drawGrid();
       drawMoves();
     }
 
-    // Helper: Convert mouse click coordinates to board cell index (0-8)
+    // Convert mouse click coordinates to board cell index (0-8)
     function getCellFromCoordinates(x, y) {
       const rect = canvas.getBoundingClientRect();
       const scaleX = canvas.width / rect.width;
@@ -116,25 +138,25 @@
 
     // Process a move when a cell is clicked
     function makeMove(index) {
-      // If cell is empty, add the current player's move
+      // Only process move if the cell is empty
       if (board[index] === null) {
         board[index] = { player: currentPlayer, faded: false };
         if (currentPlayer === 'X') {
           movesX.push(index);
-          // On the 4th move, fade the oldest move for player X
+          // Fade the oldest move when player X makes the 4th move
           if (movesX.length === 4) {
             const fadeIndex = movesX[0];
             if (board[fadeIndex]) board[fadeIndex].faded = true;
           }
         } else {
           movesO.push(index);
-          // On the 4th move, fade the oldest move for player O
+          // Fade the oldest move when player O makes the 4th move
           if (movesO.length === 4) {
             const fadeIndex = movesO[0];
             if (board[fadeIndex]) board[fadeIndex].faded = true;
           }
         }
-        // Check: When a player makes their 4th move, if the opponent has a faded move, remove it
+        // If current player's 4th move is made and the opponent has a faded move, remove it
         if (currentPlayer === 'X' && movesX.length === 4 && movesO.length >= 4) {
           const fadeIndex = movesO[0];
           if (board[fadeIndex] && board[fadeIndex].faded) {
@@ -149,16 +171,15 @@
             movesX.shift();
           }
         }
-        // Switch current player after a valid move
+        // Switch current player
         currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
         statusDiv.textContent = `Current Player: ${currentPlayer}`;
         updateCanvas();
       } else {
-        // If the cell is already occupied but is faded and belongs to the opponent, allow capture
+        // Allow capture: if a cell is faded and belongs to the opponent, let the current player claim it
         if (board[index].faded && board[index].player !== currentPlayer) {
           const opponent = board[index].player;
           board[index] = { player: currentPlayer, faded: false };
-          // Remove the faded move from the opponent's moves list
           if (opponent === 'X') {
             const pos = movesX.indexOf(index);
             if (pos > -1) movesX.splice(pos, 1);
@@ -166,7 +187,6 @@
             const pos = movesO.indexOf(index);
             if (pos > -1) movesO.splice(pos, 1);
           }
-          // Record the new move
           if (currentPlayer === 'X') {
             movesX.push(index);
             if (movesX.length === 4) {
@@ -187,7 +207,7 @@
       }
     }
 
-    // Reset the game to its initial state
+    // Reset game state and redraw the board
     function resetGame() {
       board = Array(9).fill(null);
       movesX = [];
@@ -197,16 +217,14 @@
       updateCanvas();
     }
 
-    // Handle canvas click events
+    // Attach click events for canvas and reset button
     canvas.addEventListener('click', (e) => {
       const index = getCellFromCoordinates(e.clientX, e.clientY);
       makeMove(index);
     });
-
-    // Handle reset button click
     resetButton.addEventListener('click', resetGame);
 
-    // Initial draw of the canvas
+    // Initial drawing of the game board
     updateCanvas();
   </script>
 </body>

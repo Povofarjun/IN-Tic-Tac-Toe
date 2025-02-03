@@ -1,11 +1,11 @@
-<!-- index.html - Infinity Tic Tac Toe (Enhanced UI/UX with Canvas) -->
+<!-- index.html - Infinity Tic Tac Toe (Enhanced UI/UX with Canvas, Win Logic & Infinity Mode) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Infinity Tic Tac Toe - Enhanced UI</title>
+  <title>Infinity Tic Tac Toe - Enhanced UI with Win Detection</title>
   <style>
-    /* Enhanced styling inspired by UI/UX references */
+    /* Enhanced styling inspired by provided UI/UX references */
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: linear-gradient(135deg, #74ABE2, #5563DE);
@@ -61,19 +61,42 @@
   <div id="status">Current Player: X</div>
   <button id="resetButton">Reset Game</button>
   <script>
-    // Enhanced Canvas Game Code for Infinity Tic Tac Toe
+    // Enhanced Canvas Game Code for Infinity Tic Tac Toe with Win Detection
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     const statusDiv = document.getElementById('status');
     const resetButton = document.getElementById('resetButton');
 
-    // Game state: board stores cell data; movesX/movesO track each player's moves order.
-    let board = Array(9).fill(null); // Each cell: { player: 'X'|'O', faded: boolean }
+    // Game state:
+    // board: array of 9 cells, each cell is either null or { player: 'X'|'O', faded: boolean }
+    // movesX/movesO: track the order of moves for each player to manage fading logic.
+    let board = Array(9).fill(null);
     let movesX = [];
     let movesO = [];
     let currentPlayer = 'X';
+    let gameOver = false; // When true, further moves are disabled
 
-    // Draw grid with enhanced visual style
+    // Winning combinations for 3x3 Tic Tac Toe
+    const winCombinations = [
+      [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+      [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+      [0, 4, 8], [2, 4, 6]             // Diagonals
+    ];
+
+    // Check for a win; returns 'X' or 'O' if win condition is met, otherwise null.
+    function checkWin() {
+      for (const combination of winCombinations) {
+        const [a, b, c] = combination;
+        if (board[a] && board[b] && board[c]) {
+          if (board[a].player === board[b].player && board[a].player === board[c].player) {
+            return board[a].player;
+          }
+        }
+      }
+      return null;
+    }
+
+    // Draw the grid with enhanced visual style
     function drawGrid() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.lineWidth = 4;
@@ -106,7 +129,7 @@
           ctx.font = 'bold 48px Segoe UI';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
-          // Shadow for a modern look
+          // Modern shadow effect
           ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
           ctx.shadowBlur = 4;
           ctx.shadowOffsetX = 2;
@@ -118,7 +141,7 @@
       }
     }
 
-    // Update the canvas: draw grid and then moves
+    // Update canvas by redrawing grid and moves
     function updateCanvas() {
       drawGrid();
       drawMoves();
@@ -138,25 +161,27 @@
 
     // Process a move when a cell is clicked
     function makeMove(index) {
-      // Only process move if the cell is empty
+      if (gameOver) return; // Disable moves if game is over
+
+      // Process move if cell is empty
       if (board[index] === null) {
         board[index] = { player: currentPlayer, faded: false };
         if (currentPlayer === 'X') {
           movesX.push(index);
-          // Fade the oldest move when player X makes the 4th move
+          // Fade the oldest move on the 4th move for player X
           if (movesX.length === 4) {
             const fadeIndex = movesX[0];
             if (board[fadeIndex]) board[fadeIndex].faded = true;
           }
         } else {
           movesO.push(index);
-          // Fade the oldest move when player O makes the 4th move
+          // Fade the oldest move on the 4th move for player O
           if (movesO.length === 4) {
             const fadeIndex = movesO[0];
             if (board[fadeIndex]) board[fadeIndex].faded = true;
           }
         }
-        // If current player's 4th move is made and the opponent has a faded move, remove it
+        // Remove the opponent's faded move if conditions are met
         if (currentPlayer === 'X' && movesX.length === 4 && movesO.length >= 4) {
           const fadeIndex = movesO[0];
           if (board[fadeIndex] && board[fadeIndex].faded) {
@@ -176,7 +201,7 @@
         statusDiv.textContent = `Current Player: ${currentPlayer}`;
         updateCanvas();
       } else {
-        // Allow capture: if a cell is faded and belongs to the opponent, let the current player claim it
+        // Allow capturing of a faded opponent's move
         if (board[index].faded && board[index].player !== currentPlayer) {
           const opponent = board[index].player;
           board[index] = { player: currentPlayer, faded: false };
@@ -205,6 +230,13 @@
           updateCanvas();
         }
       }
+
+      // Check for win after each move
+      const winner = checkWin();
+      if (winner) {
+        statusDiv.textContent = `Player ${winner} wins!`;
+        gameOver = true;
+      }
     }
 
     // Reset game state and redraw the board
@@ -213,11 +245,12 @@
       movesX = [];
       movesO = [];
       currentPlayer = 'X';
+      gameOver = false;
       statusDiv.textContent = `Current Player: ${currentPlayer}`;
       updateCanvas();
     }
 
-    // Attach click events for canvas and reset button
+    // Event listeners for canvas clicks and reset button
     canvas.addEventListener('click', (e) => {
       const index = getCellFromCoordinates(e.clientX, e.clientY);
       makeMove(index);

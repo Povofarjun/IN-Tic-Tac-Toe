@@ -1,93 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Enhanced Infinity Tic Tac Toe: UI and styling -->
+  <!-- Enhanced Infinity Tic Tac Toe: Minimalist Futuristic UI -->
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Enhanced Infinity Tic Tac Toe</title>
+  <!-- Import futuristic font -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet">
   <style>
+    /* Global Reset and Fullscreen Layout */
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden; /* No scroll on any size */
+      height: 100%;
+      font-family: 'Orbitron', sans-serif;
+      background: linear-gradient(135deg, #74ABE2, #5563DE);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
     :root {
       --primary-color: #5563DE;
-      --secondary-color: #74ABE2;
       --accent-color: #4452c4;
-      --text-color: #333;
       --background-start: #74ABE2;
       --background-end: #5563DE;
       --x-color: #E74C3C;
       --o-color: #2ECC71;
     }
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, var(--background-start), var(--background-end));
-      margin: 0;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-      transition: background 0.5s ease;
-    }
     .dark-mode {
       --background-start: #2c3e50;
       --background-end: #1a1a1a;
-      --text-color: #fff;
+      color: #fff;
     }
+    /* Minimalist Container */
     .game-container {
+      width: 100vw;
+      height: 100vh;
+      max-width: 600px;
+      max-height: 600px;
+      padding: 20px;
+      box-sizing: border-box;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 20px;
-      padding: 20px;
-      border-radius: 15px;
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      justify-content: space-evenly;
+      background: rgba(0,0,0,0.05);
     }
     h1 {
-      margin: 20px 0;
-      font-size: 2.5rem;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      margin: 0;
+      font-size: 2rem;
+      text-align: center;
       background: linear-gradient(45deg, #fff, #e6e6e6);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
     canvas {
-      background: rgba(255, 255, 255, 0.95);
+      background: #fff;
       border-radius: 15px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      width: 100%;
+      height: auto;
+      max-width: 400px;
+      max-height: 400px;
       cursor: pointer;
       transition: transform 0.2s ease;
-      touch-action: manipulation;
     }
     canvas:hover {
       transform: scale(1.02);
     }
-    .controls {
+    /* Minimalist Oval Buttons */
+    .controls, .difficulty-buttons {
       display: flex;
       gap: 15px;
-      margin-top: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
     }
     .button {
-      padding: 12px 25px;
+      padding: 10px 20px;
       font-size: 1rem;
       border: none;
-      border-radius: 8px;
+      border-radius: 50px;
       background: var(--primary-color);
       color: #fff;
       cursor: pointer;
       transition: all 0.3s ease;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      outline: none;
     }
     .button:hover {
       background: var(--accent-color);
-      transform: translateY(-2px);
     }
     .button:active {
-      transform: translateY(0);
+      transform: translateY(1px);
     }
     .button.undo {
       background: #e74c3c;
@@ -96,43 +100,35 @@
       background: #c0392b;
     }
     #status {
-      margin-top: 20px;
-      font-size: 1.5rem;
-      font-weight: bold;
-      text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+      font-size: 1.2rem;
       text-align: center;
-      min-height: 2em;
+      margin: 10px 0;
+      min-height: 1.5em;
     }
     .score-board {
       display: flex;
       gap: 30px;
-      margin: 20px 0;
-      padding: 15px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 10px;
-      backdrop-filter: blur(5px);
+      justify-content: center;
     }
     .score-item {
       text-align: center;
     }
     .score-label {
-      font-size: 1.2rem;
-      margin-bottom: 5px;
-      color: rgba(255, 255, 255, 0.9);
+      font-size: 1rem;
+      margin-bottom: 3px;
+      opacity: 0.8;
     }
     .score-value {
-      font-size: 2rem;
+      font-size: 1.5rem;
       font-weight: bold;
-      color: #fff;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
     }
-    /* Modal styling */
+    /* Modal Styling: Minimalist */
     .modal {
       position: fixed;
       top: 0;
       left: 0;
-      width: 100%;
-      height: 100%;
+      width: 100vw;
+      height: 100vh;
       background: rgba(0,0,0,0.8);
       display: flex;
       align-items: center;
@@ -140,7 +136,7 @@
       z-index: 1000;
       opacity: 0;
       visibility: hidden;
-      transition: all 0.3s ease;
+      transition: opacity 0.3s ease;
     }
     .modal.active {
       opacity: 1;
@@ -151,93 +147,40 @@
       padding: 30px;
       border-radius: 15px;
       text-align: center;
-      color: var(--text-color);
-      transform: scale(0.8);
-      transition: transform 0.3s ease;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      color: #333;
       max-width: 90%;
-      width: 400px;
-    }
-    .modal.active .modal-content {
-      transform: scale(1);
+      width: 300px;
     }
     .modal h2 {
       margin-bottom: 20px;
-      color: var(--text-color);
     }
-    .difficulty-buttons {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-      margin-top: 15px;
+    /* Settings and Sound Toggle */
+    .settings-icon, .sound-toggle {
+      position: fixed;
+      top: 20px;
+      background: rgba(0,0,0,0.3);
+      border: none;
+      color: #fff;
+      padding: 10px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      outline: none;
+      font-size: 1.2rem;
     }
     .settings-icon {
-      position: fixed;
-      top: 20px;
       right: 20px;
-      font-size: 24px;
-      cursor: pointer;
-      color: white;
-      background: rgba(255, 255, 255, 0.1);
-      padding: 10px;
-      border-radius: 50%;
-      transition: all 0.3s ease;
     }
-    .settings-icon:hover {
-      background: rgba(255, 255, 255, 0.2);
-      transform: rotate(30deg);
-    }
-    /* Responsive design */
-    @media (max-width: 768px) {
-      canvas {
-        width: 90vw;
-        height: 90vw;
-        max-width: 300px;
-        max-height: 300px;
-      }
-      .controls {
-        flex-direction: column;
-      }
-      .score-board {
-        flex-direction: column;
-        gap: 15px;
-      }
-    }
-    /* Animation keyframes */
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    @keyframes slideIn {
-      from { transform: translateY(-20px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-    .fade-in {
-      animation: fadeIn 0.5s ease forwards;
-    }
-    .slide-in {
-      animation: slideIn 0.5s ease forwards;
-    }
-    /* Sound toggle button */
     .sound-toggle {
-      position: fixed;
-      top: 20px;
       left: 20px;
-      background: rgba(255, 255, 255, 0.1);
-      border: none;
-      color: white;
-      padding: 10px;
-      border-radius: 50%;
-      cursor: pointer;
-      transition: all 0.3s ease;
     }
-    .sound-toggle:hover {
-      background: rgba(255, 255, 255, 0.2);
+    .settings-icon:hover, .sound-toggle:hover {
+      background: rgba(0,0,0,0.5);
     }
   </style>
 </head>
 <body>
-  <div class="settings-icon" onclick="toggleSettings()">⚙️</div>
+  <button class="settings-icon" onclick="toggleSettings()">⚙️</button>
   <button class="sound-toggle" onclick="toggleSound()">🔊</button>
   
   <div class="game-container">
@@ -255,21 +198,21 @@
     <canvas id="gameCanvas" width="300" height="300"></canvas>
     <div id="status">Current Player: X</div>
     <div class="controls">
-      <button class="button undo" onclick="undoMove()" id="undoButton">↩️ Undo</button>
-      <button class="button" onclick="resetGame()">🔄 Reset</button>
+      <button class="button undo" onclick="undoMove()" id="undoButton">Undo</button>
+      <button class="button" onclick="resetGame()">Reset</button>
     </div>
   </div>
 
-  <!-- Mode selection modal -->
+  <!-- Mode Selection Modal -->
   <div id="modeSelection" class="modal">
     <div class="modal-content">
       <h2>Select Game Mode</h2>
-      <button class="button" onclick="selectMode('pvp')">👥 Play with Player</button>
-      <button class="button" onclick="showDifficultySelection()">🤖 Play with AI</button>
+      <button class="button" onclick="selectMode('pvp')">Play PvP</button>
+      <button class="button" onclick="showDifficultySelection()">Play vs AI</button>
     </div>
   </div>
 
-  <!-- Difficulty selection modal -->
+  <!-- Difficulty Selection Modal -->
   <div id="difficultySelection" class="modal">
     <div class="modal-content">
       <h2>Select Difficulty</h2>
@@ -281,12 +224,12 @@
     </div>
   </div>
 
-  <!-- Settings modal -->
+  <!-- Settings Modal -->
   <div id="settingsModal" class="modal">
     <div class="modal-content">
       <h2>Settings</h2>
-      <button class="button" onclick="toggleDarkMode()">🌓 Toggle Dark Mode</button>
-      <button class="button" onclick="toggleSound()">🔊 Toggle Sound</button>
+      <button class="button" onclick="toggleDarkMode()">Toggle Dark Mode</button>
+      <button class="button" onclick="toggleSound()">Toggle Sound</button>
       <button class="button" onclick="hideSettings()">Close</button>
     </div>
   </div>
@@ -295,42 +238,37 @@
     /********************************************************************
      * Global Game State and Variables
      ********************************************************************/
-    // Game state is maintained in a single object for easier cloning & simulation.
     let gameState = {
-      board: Array(9).fill(null),  // Each cell: null or { player: 'X'/'O', faded: boolean }
-      movesX: [],                  // Array of indices for player X moves (order matters)
-      movesO: [],                  // Array of indices for player O moves
-      currentPlayer: 'X',          // 'X' always starts
+      board: Array(9).fill(null),
+      movesX: [],
+      movesO: [],
+      currentPlayer: 'X',
       gameOver: false
     };
 
-    let moveHistory = []; // Stack for undo (stores cloned state objects)
-    let gameMode = null;  // 'pvp' or 'ai'
+    let moveHistory = [];
+    let gameMode = null;
     let difficulty = 'medium';
     let scores = { X: 0, O: 0 };
     let soundEnabled = true;
     let isDarkMode = false;
 
-    // Sound effects
-    const moveSound = new Audio('data:audio/wav;base64,UklGRl9vAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU...'); // Placeholder Base64
-    const winSound = new Audio('data:audio/wav;base64,UklGRl9vAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU...'); // Placeholder Base64
+    const moveSound = new Audio('data:audio/wav;base64,UklGRl9vAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU...');
+    const winSound = new Audio('data:audio/wav;base64,UklGRl9vAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU...');
 
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     const statusDiv = document.getElementById('status');
 
-    // Winning combinations (indices of board cells)
     const winCombinations = [
-      [0, 1, 2], [3, 4, 5], [6, 7, 8],  // Rows
-      [0, 3, 6], [1, 4, 7], [2, 5, 8],  // Columns
-      [0, 4, 8], [2, 4, 6]              // Diagonals
+      [0, 1, 2], [3, 4, 5], [6, 7, 8],
+      [0, 3, 6], [1, 4, 7], [2, 5, 8],
+      [0, 4, 8], [2, 4, 6]
     ];
 
     /********************************************************************
      * Helper Functions for State Management and Simulation
      ********************************************************************/
-
-    // Deep clone a state object
     function cloneState(state) {
       return {
         board: state.board.map(cell => cell ? { ...cell } : null),
@@ -341,12 +279,10 @@
       };
     }
 
-    // Returns an array of valid move indices given a state.
     function getValidMoves(state) {
-      const moves = [];
+      let moves = [];
       for (let i = 0; i < state.board.length; i++) {
-        const cell = state.board[i];
-        // Valid if empty, or if faded and belongs to the opponent (capture)
+        let cell = state.board[i];
         if (cell === null || (cell.faded && cell.player !== state.currentPlayer)) {
           moves.push(i);
         }
@@ -354,14 +290,10 @@
       return moves;
     }
 
-    // Checks for a win on the board (only counts non-faded cells).
-    // Returns 'X' or 'O' if a winning combination is found, otherwise null.
     function checkWin(state) {
       for (const combo of winCombinations) {
         const [a, b, c] = combo;
-        const cellA = state.board[a];
-        const cellB = state.board[b];
-        const cellC = state.board[c];
+        const cellA = state.board[a], cellB = state.board[b], cellC = state.board[c];
         if (cellA && cellB && cellC &&
             !cellA.faded && !cellB.faded && !cellC.faded &&
             cellA.player === cellB.player && cellB.player === cellC.player) {
@@ -371,16 +303,12 @@
       return null;
     }
 
-    // Applies fading logic for a player's moves in a state.
     function updateFading(state, player) {
       let moves = player === 'X' ? state.movesX : state.movesO;
       if (moves.length === 3) {
         const fadeIndex = moves[0];
-        if (state.board[fadeIndex]) {
-          state.board[fadeIndex].faded = true;
-        }
+        if (state.board[fadeIndex]) state.board[fadeIndex].faded = true;
       }
-      // If opponent already has 3 or more moves, remove the opponent's oldest faded move.
       let opponent = player === 'X' ? 'O' : 'X';
       let opponentMoves = opponent === 'X' ? state.movesX : state.movesO;
       if (opponentMoves.length >= 3) {
@@ -392,12 +320,9 @@
       }
     }
 
-    // Simulates making a move on a cloned state (used in minimax).
-    // Returns the new state if the move is valid; otherwise, returns null.
     function simulateMakeMove(state, index) {
       const newState = cloneState(state);
       const cell = newState.board[index];
-      // If cell is empty, place current player's move.
       if (cell === null) {
         newState.board[index] = { player: newState.currentPlayer, faded: false };
         if (newState.currentPlayer === 'X') {
@@ -407,12 +332,9 @@
           newState.movesO.push(index);
           updateFading(newState, 'O');
         }
-      }
-      // Else if cell is faded and belongs to the opponent, capture it.
-      else if (cell.faded && cell.player !== newState.currentPlayer) {
+      } else if (cell.faded && cell.player !== newState.currentPlayer) {
         newState.board[index] = { player: newState.currentPlayer, faded: false };
         if (newState.currentPlayer === 'X') {
-          // Remove opponent's move
           const pos = newState.movesO.indexOf(index);
           if (pos > -1) newState.movesO.splice(pos, 1);
           newState.movesX.push(index);
@@ -424,13 +346,9 @@
           updateFading(newState, 'O');
         }
       } else {
-        // Invalid move simulation.
         return null;
       }
-      // Check if move resulted in a win.
-      const winner = checkWin(newState);
-      if (winner) newState.gameOver = true;
-      // Switch current player.
+      if (checkWin(newState)) newState.gameOver = true;
       newState.currentPlayer = newState.currentPlayer === 'X' ? 'O' : 'X';
       return newState;
     }
@@ -438,10 +356,9 @@
     /********************************************************************
      * Minimax Algorithm for AI Move Calculation
      ********************************************************************/
-    // Returns a score for the given state.
     function minimax(state, depth, isMaximizing, alpha = -Infinity, beta = Infinity) {
       const winner = checkWin(state);
-      if (winner === 'O') return 10 - depth; // AI is 'O'
+      if (winner === 'O') return 10 - depth;
       if (winner === 'X') return depth - 10;
       const validMoves = getValidMoves(state);
       if (validMoves.length === 0) return 0;
@@ -450,7 +367,7 @@
         let bestScore = -Infinity;
         for (const move of validMoves) {
           const nextState = simulateMakeMove(state, move);
-          if (!nextState) continue; // Skip invalid simulation
+          if (!nextState) continue;
           const score = minimax(nextState, depth + 1, false, alpha, beta);
           bestScore = Math.max(score, bestScore);
           alpha = Math.max(alpha, bestScore);
@@ -471,10 +388,8 @@
       }
     }
 
-    // Determines the best move for the AI ('O') based on minimax.
     function getBestMove() {
-      let bestScore = -Infinity;
-      let bestMove = null;
+      let bestScore = -Infinity, bestMove = null;
       const validMoves = getValidMoves(gameState);
       for (const move of validMoves) {
         const simulatedState = simulateMakeMove(gameState, move);
@@ -491,20 +406,12 @@
     /********************************************************************
      * Main Game Logic Functions
      ********************************************************************/
-    // Executes a move on the global game state.
-    // isSimulation flag prevents state history saving and sound playback.
     function makeMove(index, isSimulation = false) {
       if (gameState.gameOver || (gameMode === 'ai' && gameState.currentPlayer === 'O' && !isSimulation)) return;
+      if (!isSimulation) moveHistory.push(cloneState(gameState));
 
-      // Save current state for undo (only if not simulating).
-      if (!isSimulation) {
-        moveHistory.push(cloneState(gameState));
-      }
-
-      // Determine if move is valid (either empty or capture a faded opponent cell)
       const cell = gameState.board[index];
       if (cell === null || (cell.faded && cell.player !== gameState.currentPlayer)) {
-        // Apply move similarly to simulateMakeMove.
         if (cell === null) {
           gameState.board[index] = { player: gameState.currentPlayer, faded: false };
           if (gameState.currentPlayer === 'X') {
@@ -528,17 +435,12 @@
             updateFading(gameState, 'O');
           }
         }
-      } else {
-        return;
-      }
+      } else return;
       
-      // Switch current player.
       gameState.currentPlayer = gameState.currentPlayer === 'X' ? 'O' : 'X';
-      // Update status text.
       statusDiv.textContent = `Current Player: ${gameState.currentPlayer}`;
       updateCanvas();
 
-      // Check win condition.
       const winner = checkWin(gameState);
       if (winner) {
         statusDiv.textContent = `Player ${winner} wins!`;
@@ -548,14 +450,12 @@
         playSound(winSound);
         setTimeout(() => showGameOver(`Player ${winner} wins!`), 1000);
       } else if (!isSimulation && gameMode === 'ai' && gameState.currentPlayer === 'O') {
-        // Let AI make its move.
         aiMove();
       } else if (!isSimulation) {
         playSound(moveSound);
       }
     }
 
-    // Undoes the last move (only available when not in AI mode's turn).
     function undoMove() {
       if (moveHistory.length === 0 || (gameMode === 'ai' && gameState.currentPlayer === 'O')) return;
       gameState = moveHistory.pop();
@@ -563,7 +463,6 @@
       updateCanvas();
     }
 
-    // Resets the game state.
     function resetGame() {
       gameState = {
         board: Array(9).fill(null),
@@ -584,23 +483,16 @@
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.lineWidth = 4;
       ctx.strokeStyle = isDarkMode ? '#fff' : '#333';
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
-      ctx.shadowBlur = 5;
-      ctx.shadowOffsetX = 2;
-      ctx.shadowOffsetY = 2;
       ctx.beginPath();
-      // Vertical lines
       ctx.moveTo(100, 10);
       ctx.lineTo(100, 290);
       ctx.moveTo(200, 10);
       ctx.lineTo(200, 290);
-      // Horizontal lines
       ctx.moveTo(10, 100);
       ctx.lineTo(290, 100);
       ctx.moveTo(10, 200);
       ctx.lineTo(290, 200);
       ctx.stroke();
-      ctx.shadowColor = 'transparent';
     }
 
     function drawMoves() {
@@ -613,13 +505,9 @@
           const centerY = row * 100 + 50;
           ctx.save();
           ctx.globalAlpha = cell.faded ? 0.3 : 1.0;
-          ctx.font = 'bold 60px Segoe UI';
+          ctx.font = 'bold 60px Orbitron';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
-          ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-          ctx.shadowBlur = 4;
-          ctx.shadowOffsetX = 2;
-          ctx.shadowOffsetY = 2;
           const gradient = ctx.createLinearGradient(centerX - 25, centerY - 25, centerX + 25, centerY + 25);
           if (cell.player === 'X') {
             gradient.addColorStop(0, '#E74C3C');
@@ -657,8 +545,7 @@
     }
 
     function showModeSelection() {
-      const modal = document.getElementById('modeSelection');
-      modal.classList.add('active');
+      document.getElementById('modeSelection').classList.add('active');
     }
 
     function showDifficultySelection() {
@@ -679,7 +566,6 @@
       resetGame();
     }
 
-    // Toggle Settings Modal
     function toggleSettings() {
       document.getElementById('settingsModal').classList.add('active');
     }
@@ -716,20 +602,16 @@
           move = validMoves[Math.floor(Math.random() * validMoves.length)];
           break;
         case 'medium':
-          if (Math.random() < 0.7) {
-            move = getBestMove();
-          } else {
-            move = validMoves[Math.floor(Math.random() * validMoves.length)];
-          }
+          move = Math.random() < 0.7 ? getBestMove() : validMoves[Math.floor(Math.random() * validMoves.length)];
           break;
         case 'hard':
           move = getBestMove();
           break;
       }
-      setTimeout(() => makeMove(move), 500);
+      // Reduced delay to mimic natural play
+      setTimeout(() => makeMove(move), 300);
     }
 
-    // Event listeners for canvas click and touch.
     canvas.addEventListener('click', (e) => {
       const rect = canvas.getBoundingClientRect();
       const scaleX = canvas.width / rect.width;
@@ -756,7 +638,6 @@
       makeMove(index);
     });
 
-    // Initialize game on load.
     updateCanvas();
     showModeSelection();
   </script>

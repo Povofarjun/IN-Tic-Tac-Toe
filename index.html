@@ -1,39 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Enhanced Infinity Tic Tac Toe: Futuristic UI with Advanced Features -->
+  <!-- Quantum Tic Tac Toe: Minimalist Futuristic UI & Simplified AI -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Quantum Tic Tac Toe</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    /* Modern Color Scheme and Animations */
-    :root {
-      --primary-gradient: linear-gradient(135deg, #7F5FFF 0%, #01CCFE 100%);
-      --dark-bg: #0a0e1a;
-      --neon-blue: #00f3ff;
-      --neon-pink: #ff00ff;
-      --grid-color: rgba(255, 255, 255, 0.1);
-    }
-
-    body {
+    /* Global Reset & Fullscreen, No Scroll */
+    html, body {
       margin: 0;
       padding: 0;
       overflow: hidden;
       height: 100%;
       font-family: 'Orbitron', sans-serif;
-      background: var(--dark-bg);
+      background: #0a0e1a;
       color: #fff;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: background 0.3s ease;
     }
-
+    /* Game Container */
     .game-container {
       width: 100vw;
       height: 100vh;
       max-width: 600px;
+      max-height: 600px;
       padding: 20px;
       box-sizing: border-box;
       display: flex;
@@ -42,7 +34,7 @@
       justify-content: space-evenly;
       position: relative;
     }
-
+    /* Canvas Styling */
     canvas {
       background: rgba(0, 0, 0, 0.3);
       border-radius: 15px;
@@ -52,27 +44,25 @@
       box-shadow: 0 0 30px rgba(127, 95, 255, 0.2);
       transition: transform 0.2s ease, box-shadow 0.3s ease;
     }
-
     canvas:hover {
       transform: scale(1.02);
       box-shadow: 0 0 40px rgba(127, 95, 255, 0.4);
     }
-
-    /* Glowing Buttons */
+    /* Minimalist Oval Glowing Buttons */
     .button {
       padding: 12px 25px;
       font-size: 1.1rem;
       border: none;
       border-radius: 30px;
-      background: var(--primary-gradient);
+      background: linear-gradient(135deg, #7F5FFF 0%, #01CCFE 100%);
       color: white;
       cursor: pointer;
       transition: all 0.3s ease;
       position: relative;
       overflow: hidden;
       border: 2px solid rgba(127, 95, 255, 0.5);
+      outline: none;
     }
-
     .button:before {
       content: '';
       position: absolute;
@@ -80,29 +70,22 @@
       left: -100%;
       width: 200%;
       height: 100%;
-      background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(255, 255, 255, 0.2),
-        transparent
-      );
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
       transition: 0.5s;
     }
-
     .button:hover:before {
       left: 100%;
     }
-
+    /* Status Message */
     #status {
       font-size: 1.3rem;
       text-align: center;
       margin: 15px 0;
-      background: var(--primary-gradient);
+      background: linear-gradient(135deg, #7F5FFF 0%, #01CCFE 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       text-shadow: 0 0 15px rgba(127, 95, 255, 0.3);
     }
-
     /* Holographic Score Board */
     .score-board {
       display: flex;
@@ -114,12 +97,10 @@
       border: 1px solid rgba(127, 95, 255, 0.2);
       box-shadow: 0 0 20px rgba(127, 95, 255, 0.1);
     }
-
     .score-item {
       text-align: center;
       position: relative;
     }
-
     .score-item:not(:last-child):after {
       content: '';
       position: absolute;
@@ -130,202 +111,256 @@
       width: 2px;
       background: rgba(127, 95, 255, 0.3);
     }
-
+    .score-label {
+      font-size: 1rem;
+      margin-bottom: 3px;
+      opacity: 0.8;
+    }
     .score-value {
       font-size: 1.8rem;
       font-weight: bold;
-      background: var(--primary-gradient);
+      background: linear-gradient(135deg, #7F5FFF 0%, #01CCFE 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
-
-    /* Enhanced Modal Design */
-    .modal-content {
-      background: rgba(10, 14, 26, 0.95);
-      border: 2px solid rgba(127, 95, 255, 0.3);
-      backdrop-filter: blur(15px);
-      box-shadow: 0 0 40px rgba(0, 0, 0, 0.3);
-    }
-
-    .modal h2 {
-      background: var(--primary-gradient);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 25px;
-    }
-
     /* Responsive Adjustments */
     @media (max-width: 480px) {
-      .game-container {
-        padding: 10px;
-      }
-      
-      canvas {
-        width: 100%;
-        max-width: 320px;
-      }
-      
-      .button {
-        padding: 10px 20px;
-        font-size: 1rem;
-      }
+      .game-container { padding: 10px; }
+      canvas { max-width: 320px; }
+      .button { padding: 10px 20px; font-size: 1rem; }
     }
   </style>
 </head>
 <body>
-  <!-- [Same HTML structure as before with updated class names] -->
+  <div class="game-container">
+    <canvas id="gameCanvas" width="300" height="300"></canvas>
+    <div id="status">Current Player: X</div>
+    <div class="controls">
+      <button class="button" onclick="resetGame()">Reset</button>
+      <button class="button" onclick="undoMove()">Undo</button>
+    </div>
+    <div class="score-board">
+      <div class="score-item">
+        <div class="score-label">Player X</div>
+        <div class="score-value" id="scoreX">0</div>
+      </div>
+      <div class="score-item">
+        <div class="score-label">Player O</div>
+        <div class="score-value" id="scoreO">0</div>
+      </div>
+    </div>
+  </div>
 
   <script>
     /********************************************************************
-     * Optimized Game Engine with Improved AI and State Management
+     * Game State & Variables
      ********************************************************************/
-    const AI_DEPTH = 4; // Optimized depth for better performance
-    const WIN_SCORE = 1000;
-    
-    const gameState = {
+    let gameState = {
       board: Array(9).fill(null),
-      movesX: [],
-      movesO: [],
       currentPlayer: 'X',
-      gameOver: false
+      gameOver: false,
+      movesX: [],
+      movesO: []
     };
-
     let moveHistory = [];
-    let gameMode = null;
-    let difficulty = 'medium';
+    let gameMode = 'ai';      // Set 'ai' for playing against computer
     let scores = { X: 0, O: 0 };
-    let soundEnabled = true;
+    let soundEnabled = true;  // (Sound features can be added if desired)
 
-    // Optimized Win Check
-    function checkWin(state) {
-      const moves = state.currentPlayer === 'X' 
-        ? state.movesX.slice(-3) 
-        : state.movesO.slice(-3);
-      
-      if (moves.length < 3) return null;
-      
-      const sorted = [...moves].sort((a, b) => a - b);
-      const winPattern = sorted.join('');
-      
-      // Check against precomputed winning patterns
-      const winPatterns = new Set(['012','036','048','147','246','258','345','678']);
-      return winPatterns.has(winPattern) ? state.currentPlayer : null;
+    /********************************************************************
+     * Utility Functions
+     ********************************************************************/
+    // Check if the given player has won using standard tic tac toe win combinations.
+    function checkWin(state, player) {
+      const moves = player === 'X' ? state.movesX : state.movesO;
+      if (moves.length < 3) return false;
+      const winCombos = [
+        [0,1,2], [3,4,5], [6,7,8],
+        [0,3,6], [1,4,7], [2,5,8],
+        [0,4,8], [2,4,6]
+      ];
+      return winCombos.some(combo => combo.every(i => moves.includes(i)));
     }
-
-    // Enhanced Minimax with Alpha-Beta Pruning and Memoization
-    const memo = new Map();
     
-    function minimax(state, depth, alpha, beta, isMaximizing) {
-      const key = state.board.map(c => c ? c.player : ' ').join('') + state.currentPlayer;
-      if (memo.has(key)) return memo.get(key);
-
-      const winner = checkWin(state);
-      if (winner) {
-        const score = isMaximizing ? -WIN_SCORE + depth : WIN_SCORE - depth;
-        memo.set(key, score);
-        return score;
-      }
-      
-      if (depth >= AI_DEPTH) return heuristicEvaluation(state);
-
-      const validMoves = getValidMoves(state);
-      if (!validMoves.length) return 0;
-
-      let bestScore = isMaximizing ? -Infinity : Infinity;
-      
-      for (const move of validMoves) {
-        const nextState = simulateMove(state, move);
-        const score = minimax(nextState, depth + 1, alpha, beta, !isMaximizing);
-        
-        if (isMaximizing) {
-          bestScore = Math.max(bestScore, score);
-          alpha = Math.max(alpha, bestScore);
-        } else {
-          bestScore = Math.min(bestScore, score);
-          beta = Math.min(beta, bestScore);
-        }
-        
-        if (beta <= alpha) break;
-      }
-      
-      memo.set(key, bestScore);
-      return bestScore;
+    // Returns an array of available move indices.
+    function getValidMoves(state) {
+      const moves = [];
+      state.board.forEach((cell, i) => { if (cell === null) moves.push(i); });
+      return moves;
     }
-
-    function heuristicEvaluation(state) {
-      let score = 0;
-      // Add custom heuristic evaluations here
-      return score;
-    }
-
-    // Optimized Move Simulation
+    
+    // Simulate a move on a cloned state.
     function simulateMove(state, move) {
+      if (state.board[move] !== null) return null;
       const newState = JSON.parse(JSON.stringify(state));
-      // ... (existing move simulation logic)
+      newState.board[move] = newState.currentPlayer;
+      if (newState.currentPlayer === 'X') newState.movesX.push(move);
+      else newState.movesO.push(move);
+      if (checkWin(newState, newState.currentPlayer)) newState.gameOver = true;
+      newState.currentPlayer = newState.currentPlayer === 'X' ? 'O' : 'X';
       return newState;
     }
-
-    /********************************************************************
-     * Enhanced Touch and Animation Handling
-     ********************************************************************/
-    let lastTouch = 0;
-    const TOUCH_DELAY = 300;
     
-    function handleInteraction(x, y) {
-      const now = Date.now();
-      if (now - lastTouch < TOUCH_DELAY) return;
-      lastTouch = now;
+    /********************************************************************
+     * Minimax AI with Alpha-Beta Pruning
+     ********************************************************************/
+    function minimax(state, depth, isMaximizing) {
+      if (checkWin(state, 'O')) return 10 - depth;
+      if (checkWin(state, 'X')) return depth - 10;
+      if (getValidMoves(state).length === 0) return 0;
       
-      // Add ripple effect
-      const ripple = document.createElement('div');
-      ripple.style.cssText = `
-        position: fixed;
-        width: 40px;
-        height: 40px;
-        background: rgba(127, 95, 255, 0.3);
-        border-radius: 50%;
-        transform: translate(-50%, -50%);
-        pointer-events: none;
-        animation: ripple 0.6s linear;
-      `;
-      ripple.style.left = `${x}px`;
-      ripple.style.top = `${y}px`;
-      document.body.appendChild(ripple);
-      setTimeout(() => ripple.remove(), 600);
+      if (isMaximizing) {
+        let bestScore = -Infinity;
+        for (const move of getValidMoves(state)) {
+          const nextState = simulateMove(state, move);
+          if (!nextState) continue;
+          const score = minimax(nextState, depth + 1, false);
+          bestScore = Math.max(bestScore, score);
+        }
+        return bestScore;
+      } else {
+        let bestScore = Infinity;
+        for (const move of getValidMoves(state)) {
+          const nextState = simulateMove(state, move);
+          if (!nextState) continue;
+          const score = minimax(nextState, depth + 1, true);
+          bestScore = Math.min(bestScore, score);
+        }
+        return bestScore;
+      }
     }
-
-    // Add to event listeners:
+    
+    // Determine the best move for the AI (assumed to be 'O').
+    function getBestMove() {
+      let bestScore = -Infinity;
+      let bestMove = null;
+      for (const move of getValidMoves(gameState)) {
+        const simulated = simulateMove(gameState, move);
+        if (!simulated) continue;
+        const score = minimax(simulated, 0, false);
+        if (score > bestScore) {
+          bestScore = score;
+          bestMove = move;
+        }
+      }
+      return bestMove;
+    }
+    
+    /********************************************************************
+     * Main Game Functions
+     ********************************************************************/
+    function makeMove(move, isSimulation = false) {
+      if (gameState.gameOver) return;
+      // Prevent player move during AI turn.
+      if (!isSimulation && gameMode === 'ai' && gameState.currentPlayer === 'O') return;
+      if (!isSimulation) moveHistory.push(JSON.parse(JSON.stringify(gameState)));
+      if (gameState.board[move] !== null) return;
+      
+      gameState.board[move] = gameState.currentPlayer;
+      if (gameState.currentPlayer === 'X') gameState.movesX.push(move);
+      else gameState.movesO.push(move);
+      
+      if (checkWin(gameState, gameState.currentPlayer)) {
+        gameState.gameOver = true;
+        scores[gameState.currentPlayer]++;
+        updateScoreBoard();
+        document.getElementById('status').innerText = "Player " + gameState.currentPlayer + " wins!";
+        updateCanvas();
+        return;
+      }
+      
+      gameState.currentPlayer = gameState.currentPlayer === 'X' ? 'O' : 'X';
+      document.getElementById('status').innerText = "Current Player: " + gameState.currentPlayer;
+      updateCanvas();
+      
+      // AI move if it's AI's turn.
+      if (gameMode === 'ai' && gameState.currentPlayer === 'O') {
+        setTimeout(() => {
+          const best = getBestMove();
+          if (best !== null) makeMove(best);
+        }, 500);
+      }
+    }
+    
+    function undoMove() {
+      if (moveHistory.length === 0) return;
+      gameState = JSON.parse(JSON.stringify(moveHistory.pop()));
+      document.getElementById('status').innerText = "Current Player: " + gameState.currentPlayer;
+      updateCanvas();
+    }
+    
+    function resetGame() {
+      gameState = { board: Array(9).fill(null), currentPlayer: 'X', gameOver: false, movesX: [], movesO: [] };
+      moveHistory = [];
+      document.getElementById('status').innerText = "Current Player: X";
+      updateCanvas();
+    }
+    
+    /********************************************************************
+     * Canvas Drawing Functions
+     ********************************************************************/
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    function updateCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawGrid();
+      drawMoves();
+    }
+    
+    function drawGrid() {
+      ctx.strokeStyle = "rgba(255,255,255,0.2)";
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(canvas.width / 3, 0);
+      ctx.lineTo(canvas.width / 3, canvas.height);
+      ctx.moveTo(2 * canvas.width / 3, 0);
+      ctx.lineTo(2 * canvas.width / 3, canvas.height);
+      ctx.moveTo(0, canvas.height / 3);
+      ctx.lineTo(canvas.width, canvas.height / 3);
+      ctx.moveTo(0, 2 * canvas.height / 3);
+      ctx.lineTo(canvas.width, 2 * canvas.height / 3);
+      ctx.stroke();
+    }
+    
+    function drawMoves() {
+      for (let i = 0; i < 9; i++) {
+        if (gameState.board[i] !== null) {
+          const col = i % 3;
+          const row = Math.floor(i / 3);
+          const centerX = col * (canvas.width / 3) + (canvas.width / 6);
+          const centerY = row * (canvas.height / 3) + (canvas.height / 6);
+          ctx.font = "bold 60px Orbitron";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillStyle = gameState.board[i] === 'X' ? "#ff00ff" : "#00f3ff";
+          ctx.fillText(gameState.board[i], centerX, centerY);
+        }
+      }
+    }
+    
+    updateCanvas();
+    
+    /********************************************************************
+     * Event Listeners
+     ********************************************************************/
     canvas.addEventListener('click', (e) => {
       const rect = canvas.getBoundingClientRect();
-      handleInteraction(e.clientX, e.clientY);
-      // ... existing click logic
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const col = Math.floor(x / (canvas.width / 3));
+      const row = Math.floor(y / (canvas.height / 3));
+      const move = row * 3 + col;
+      makeMove(move);
     });
-
-    canvas.addEventListener('touchstart', (e) => {
-      e.preventDefault();
-      const touch = e.touches[0];
-      handleInteraction(touch.clientX, touch.clientY);
-      // ... existing touch logic
-    });
-
+    
     /********************************************************************
-     * Additional Optimizations and Features
+     * Score Board Update
      ********************************************************************/
-    // Web Worker for AI Computation
-    const aiWorker = new Worker('ai-worker.js'); // Externalize AI logic
-
-    // GPU-accelerated animations
-    function animateGrid() {
-      canvas.style.transform = `rotateZ(${Math.sin(Date.now()/1000)*0.5}deg)`;
-      requestAnimationFrame(animateGrid);
+    function updateScoreBoard() {
+      document.getElementById('scoreX').innerText = scores.X;
+      document.getElementById('scoreO').innerText = scores.O;
     }
-    animateGrid();
-
-    // WebSocket Multiplayer Support (Example)
-    const socket = new WebSocket('wss://yourserver.com/game');
-    socket.addEventListener('message', handleNetworkEvent);
-
-    // ... Rest of the game logic with optimizations
   </script>
 </body>
 </html>

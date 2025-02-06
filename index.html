@@ -1,372 +1,763 @@
-<!-- index.html - Infinity Tic Tac Toe (Enhanced UI/UX with Canvas, Win Detection, AI Mode, and Mode Selection) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Enhanced Infinity Tic Tac Toe: UI and styling -->
   <meta charset="UTF-8">
-  <title>Infinity Tic Tac Toe - Enhanced UI with AI Mode</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enhanced Infinity Tic Tac Toe</title>
   <style>
-    /* Enhanced styling inspired by provided UI/UX references */
+    :root {
+      --primary-color: #5563DE;
+      --secondary-color: #74ABE2;
+      --accent-color: #4452c4;
+      --text-color: #333;
+      --background-start: #74ABE2;
+      --background-end: #5563DE;
+      --x-color: #E74C3C;
+      --o-color: #2ECC71;
+    }
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #74ABE2, #5563DE);
+      background: linear-gradient(135deg, var(--background-start), var(--background-end));
       margin: 0;
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 100vh;
       color: #fff;
+      transition: background 0.5s ease;
+    }
+    .dark-mode {
+      --background-start: #2c3e50;
+      --background-end: #1a1a1a;
+      --text-color: #fff;
+    }
+    .game-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      padding: 20px;
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     }
     h1 {
       margin: 20px 0;
       font-size: 2.5rem;
       text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      background: linear-gradient(45deg, #fff, #e6e6e6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
     canvas {
-      background: #fff;
-      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 15px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.2);
       cursor: pointer;
       transition: transform 0.2s ease;
+      touch-action: manipulation;
     }
     canvas:hover {
       transform: scale(1.02);
+    }
+    .controls {
+      display: flex;
+      gap: 15px;
+      margin-top: 20px;
+    }
+    .button {
+      padding: 12px 25px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      background: var(--primary-color);
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .button:hover {
+      background: var(--accent-color);
+      transform: translateY(-2px);
+    }
+    .button:active {
+      transform: translateY(0);
+    }
+    .button.undo {
+      background: #e74c3c;
+    }
+    .button.undo:hover {
+      background: #c0392b;
     }
     #status {
       margin-top: 20px;
       font-size: 1.5rem;
       font-weight: bold;
       text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+      text-align: center;
+      min-height: 2em;
     }
-    #resetButton {
-      margin-top: 15px;
-      padding: 10px 25px;
-      font-size: 1rem;
-      border: none;
-      border-radius: 5px;
-      background: #5563DE;
+    .score-board {
+      display: flex;
+      gap: 30px;
+      margin: 20px 0;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      backdrop-filter: blur(5px);
+    }
+    .score-item {
+      text-align: center;
+    }
+    .score-label {
+      font-size: 1.2rem;
+      margin-bottom: 5px;
+      color: rgba(255, 255, 255, 0.9);
+    }
+    .score-value {
+      font-size: 2rem;
+      font-weight: bold;
       color: #fff;
-      cursor: pointer;
-      transition: background 0.3s ease;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
     }
-    #resetButton:hover {
-      background: #4452c4;
-    }
-    /* Modal overlay for mode selection */
-    #modeSelection {
+    /* Modal styling */
+    .modal {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0,0,0,0.7);
+      background: rgba(0,0,0,0.8);
       display: flex;
       align-items: center;
       justify-content: center;
       z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
     }
-    #modeSelectionContent {
+    .modal.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    .modal-content {
       background: #fff;
-      padding: 20px;
-      border-radius: 10px;
+      padding: 30px;
+      border-radius: 15px;
       text-align: center;
-      color: #333;
+      color: var(--text-color);
+      transform: scale(0.8);
+      transition: transform 0.3s ease;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      max-width: 90%;
+      width: 400px;
     }
-    #modeSelectionContent h2 {
+    .modal.active .modal-content {
+      transform: scale(1);
+    }
+    .modal h2 {
       margin-bottom: 20px;
+      color: var(--text-color);
     }
-    #modeSelectionContent button {
-      margin: 10px;
-      padding: 10px 20px;
-      font-size: 1rem;
-      border: none;
-      border-radius: 5px;
+    .difficulty-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 15px;
+    }
+    .settings-icon {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      font-size: 24px;
       cursor: pointer;
-      background: #5563DE;
-      color: #fff;
-      transition: background 0.3s ease;
+      color: white;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 10px;
+      border-radius: 50%;
+      transition: all 0.3s ease;
     }
-    #modeSelectionContent button:hover {
-      background: #4452c4;
+    .settings-icon:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: rotate(30deg);
+    }
+    /* Responsive design */
+    @media (max-width: 768px) {
+      canvas {
+        width: 90vw;
+        height: 90vw;
+        max-width: 300px;
+        max-height: 300px;
+      }
+      .controls {
+        flex-direction: column;
+      }
+      .score-board {
+        flex-direction: column;
+        gap: 15px;
+      }
+    }
+    /* Animation keyframes */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes slideIn {
+      from { transform: translateY(-20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .fade-in {
+      animation: fadeIn 0.5s ease forwards;
+    }
+    .slide-in {
+      animation: slideIn 0.5s ease forwards;
+    }
+    /* Sound toggle button */
+    .sound-toggle {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: white;
+      padding: 10px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .sound-toggle:hover {
+      background: rgba(255, 255, 255, 0.2);
     }
   </style>
 </head>
 <body>
-  <h1>Infinity Tic Tac Toe</h1>
-  <canvas id="gameCanvas" width="300" height="300"></canvas>
-  <div id="status">Current Player: X</div>
-  <button id="resetButton" style="display:none;">Reset Game</button>
+  <div class="settings-icon" onclick="toggleSettings()">⚙️</div>
+  <button class="sound-toggle" onclick="toggleSound()">🔊</button>
+  
+  <div class="game-container">
+    <h1>Infinity Tic Tac Toe</h1>
+    <div class="score-board">
+      <div class="score-item">
+        <div class="score-label">Player X</div>
+        <div class="score-value" id="scoreX">0</div>
+      </div>
+      <div class="score-item">
+        <div class="score-label">Player O</div>
+        <div class="score-value" id="scoreO">0</div>
+      </div>
+    </div>
+    <canvas id="gameCanvas" width="300" height="300"></canvas>
+    <div id="status">Current Player: X</div>
+    <div class="controls">
+      <button class="button undo" onclick="undoMove()" id="undoButton">↩️ Undo</button>
+      <button class="button" onclick="resetGame()">🔄 Reset</button>
+    </div>
+  </div>
 
   <!-- Mode selection modal -->
-  <div id="modeSelection">
-    <div id="modeSelectionContent">
+  <div id="modeSelection" class="modal">
+    <div class="modal-content">
       <h2>Select Game Mode</h2>
-      <button id="btnPVP">Play with Player</button>
-      <button id="btnAI">Play with AI</button>
+      <button class="button" onclick="selectMode('pvp')">👥 Play with Player</button>
+      <button class="button" onclick="showDifficultySelection()">🤖 Play with AI</button>
+    </div>
+  </div>
+
+  <!-- Difficulty selection modal -->
+  <div id="difficultySelection" class="modal">
+    <div class="modal-content">
+      <h2>Select Difficulty</h2>
+      <div class="difficulty-buttons">
+        <button class="button" onclick="selectDifficulty('easy')">Easy</button>
+        <button class="button" onclick="selectDifficulty('medium')">Medium</button>
+        <button class="button" onclick="selectDifficulty('hard')">Hard</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings modal -->
+  <div id="settingsModal" class="modal">
+    <div class="modal-content">
+      <h2>Settings</h2>
+      <button class="button" onclick="toggleDarkMode()">🌓 Toggle Dark Mode</button>
+      <button class="button" onclick="toggleSound()">🔊 Toggle Sound</button>
+      <button class="button" onclick="hideSettings()">Close</button>
     </div>
   </div>
 
   <script>
-    // Enhanced Canvas Game Code for Infinity Tic Tac Toe with Win Detection, AI Mode, and Mode Selection
+    /********************************************************************
+     * Global Game State and Variables
+     ********************************************************************/
+    // Game state is maintained in a single object for easier cloning & simulation.
+    let gameState = {
+      board: Array(9).fill(null),  // Each cell: null or { player: 'X'/'O', faded: boolean }
+      movesX: [],                  // Array of indices for player X moves (order matters)
+      movesO: [],                  // Array of indices for player O moves
+      currentPlayer: 'X',          // 'X' always starts
+      gameOver: false
+    };
+
+    let moveHistory = []; // Stack for undo (stores cloned state objects)
+    let gameMode = null;  // 'pvp' or 'ai'
+    let difficulty = 'medium';
+    let scores = { X: 0, O: 0 };
+    let soundEnabled = true;
+    let isDarkMode = false;
+
+    // Sound effects
+    const moveSound = new Audio('data:audio/wav;base64,UklGRl9vAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU...'); // Placeholder Base64
+    const winSound = new Audio('data:audio/wav;base64,UklGRl9vAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU...'); // Placeholder Base64
+
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     const statusDiv = document.getElementById('status');
-    const resetButton = document.getElementById('resetButton');
-    const modeSelection = document.getElementById('modeSelection');
-    const modeSelectionContent = document.getElementById('modeSelectionContent');
 
-    let board = Array(9).fill(null); // Each cell: { player: 'X'|'O', faded: boolean }
-    let movesX = [];
-    let movesO = [];
-    let currentPlayer = 'X';
-    let gameOver = false;
-    let gameMode = null; // "pvp" or "ai"
-
-    // Winning combinations for 3x3 Tic Tac Toe
+    // Winning combinations (indices of board cells)
     const winCombinations = [
-      [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
-      [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
-      [0, 4, 8], [2, 4, 6]             // Diagonals
+      [0, 1, 2], [3, 4, 5], [6, 7, 8],  // Rows
+      [0, 3, 6], [1, 4, 7], [2, 5, 8],  // Columns
+      [0, 4, 8], [2, 4, 6]              // Diagonals
     ];
 
-    // Check for win; returns 'X' or 'O' if win condition is met, otherwise null.
-    function checkWin() {
-      for (const combination of winCombinations) {
-        const [a, b, c] = combination;
-        if (board[a] && board[b] && board[c]) {
-          if (board[a].player === board[b].player && board[a].player === board[c].player) {
-            return board[a].player;
-          }
+    /********************************************************************
+     * Helper Functions for State Management and Simulation
+     ********************************************************************/
+
+    // Deep clone a state object
+    function cloneState(state) {
+      return {
+        board: state.board.map(cell => cell ? { ...cell } : null),
+        movesX: [...state.movesX],
+        movesO: [...state.movesO],
+        currentPlayer: state.currentPlayer,
+        gameOver: state.gameOver
+      };
+    }
+
+    // Returns an array of valid move indices given a state.
+    function getValidMoves(state) {
+      const moves = [];
+      for (let i = 0; i < state.board.length; i++) {
+        const cell = state.board[i];
+        // Valid if empty, or if faded and belongs to the opponent (capture)
+        if (cell === null || (cell.faded && cell.player !== state.currentPlayer)) {
+          moves.push(i);
+        }
+      }
+      return moves;
+    }
+
+    // Checks for a win on the board (only counts non-faded cells).
+    // Returns 'X' or 'O' if a winning combination is found, otherwise null.
+    function checkWin(state) {
+      for (const combo of winCombinations) {
+        const [a, b, c] = combo;
+        const cellA = state.board[a];
+        const cellB = state.board[b];
+        const cellC = state.board[c];
+        if (cellA && cellB && cellC &&
+            !cellA.faded && !cellB.faded && !cellC.faded &&
+            cellA.player === cellB.player && cellB.player === cellC.player) {
+          return cellA.player;
         }
       }
       return null;
     }
 
-    // Draw grid with enhanced visual style
+    // Applies fading logic for a player's moves in a state.
+    function updateFading(state, player) {
+      let moves = player === 'X' ? state.movesX : state.movesO;
+      if (moves.length === 3) {
+        const fadeIndex = moves[0];
+        if (state.board[fadeIndex]) {
+          state.board[fadeIndex].faded = true;
+        }
+      }
+      // If opponent already has 3 or more moves, remove the opponent's oldest faded move.
+      let opponent = player === 'X' ? 'O' : 'X';
+      let opponentMoves = opponent === 'X' ? state.movesX : state.movesO;
+      if (opponentMoves.length >= 3) {
+        const oppFadeIndex = opponentMoves[0];
+        if (state.board[oppFadeIndex] && state.board[oppFadeIndex].faded) {
+          state.board[oppFadeIndex] = null;
+          opponentMoves.shift();
+        }
+      }
+    }
+
+    // Simulates making a move on a cloned state (used in minimax).
+    // Returns the new state if the move is valid; otherwise, returns null.
+    function simulateMakeMove(state, index) {
+      const newState = cloneState(state);
+      const cell = newState.board[index];
+      // If cell is empty, place current player's move.
+      if (cell === null) {
+        newState.board[index] = { player: newState.currentPlayer, faded: false };
+        if (newState.currentPlayer === 'X') {
+          newState.movesX.push(index);
+          updateFading(newState, 'X');
+        } else {
+          newState.movesO.push(index);
+          updateFading(newState, 'O');
+        }
+      }
+      // Else if cell is faded and belongs to the opponent, capture it.
+      else if (cell.faded && cell.player !== newState.currentPlayer) {
+        newState.board[index] = { player: newState.currentPlayer, faded: false };
+        if (newState.currentPlayer === 'X') {
+          // Remove opponent's move
+          const pos = newState.movesO.indexOf(index);
+          if (pos > -1) newState.movesO.splice(pos, 1);
+          newState.movesX.push(index);
+          updateFading(newState, 'X');
+        } else {
+          const pos = newState.movesX.indexOf(index);
+          if (pos > -1) newState.movesX.splice(pos, 1);
+          newState.movesO.push(index);
+          updateFading(newState, 'O');
+        }
+      } else {
+        // Invalid move simulation.
+        return null;
+      }
+      // Check if move resulted in a win.
+      const winner = checkWin(newState);
+      if (winner) newState.gameOver = true;
+      // Switch current player.
+      newState.currentPlayer = newState.currentPlayer === 'X' ? 'O' : 'X';
+      return newState;
+    }
+
+    /********************************************************************
+     * Minimax Algorithm for AI Move Calculation
+     ********************************************************************/
+    // Returns a score for the given state.
+    function minimax(state, depth, isMaximizing, alpha = -Infinity, beta = Infinity) {
+      const winner = checkWin(state);
+      if (winner === 'O') return 10 - depth; // AI is 'O'
+      if (winner === 'X') return depth - 10;
+      const validMoves = getValidMoves(state);
+      if (validMoves.length === 0) return 0;
+
+      if (isMaximizing) {
+        let bestScore = -Infinity;
+        for (const move of validMoves) {
+          const nextState = simulateMakeMove(state, move);
+          if (!nextState) continue; // Skip invalid simulation
+          const score = minimax(nextState, depth + 1, false, alpha, beta);
+          bestScore = Math.max(score, bestScore);
+          alpha = Math.max(alpha, bestScore);
+          if (beta <= alpha) break;
+        }
+        return bestScore;
+      } else {
+        let bestScore = Infinity;
+        for (const move of validMoves) {
+          const nextState = simulateMakeMove(state, move);
+          if (!nextState) continue;
+          const score = minimax(nextState, depth + 1, true, alpha, beta);
+          bestScore = Math.min(score, bestScore);
+          beta = Math.min(beta, bestScore);
+          if (beta <= alpha) break;
+        }
+        return bestScore;
+      }
+    }
+
+    // Determines the best move for the AI ('O') based on minimax.
+    function getBestMove() {
+      let bestScore = -Infinity;
+      let bestMove = null;
+      const validMoves = getValidMoves(gameState);
+      for (const move of validMoves) {
+        const simulatedState = simulateMakeMove(gameState, move);
+        if (!simulatedState) continue;
+        const score = minimax(simulatedState, 0, false);
+        if (score > bestScore) {
+          bestScore = score;
+          bestMove = move;
+        }
+      }
+      return bestMove;
+    }
+
+    /********************************************************************
+     * Main Game Logic Functions
+     ********************************************************************/
+    // Executes a move on the global game state.
+    // isSimulation flag prevents state history saving and sound playback.
+    function makeMove(index, isSimulation = false) {
+      if (gameState.gameOver || (gameMode === 'ai' && gameState.currentPlayer === 'O' && !isSimulation)) return;
+
+      // Save current state for undo (only if not simulating).
+      if (!isSimulation) {
+        moveHistory.push(cloneState(gameState));
+      }
+
+      // Determine if move is valid (either empty or capture a faded opponent cell)
+      const cell = gameState.board[index];
+      if (cell === null || (cell.faded && cell.player !== gameState.currentPlayer)) {
+        // Apply move similarly to simulateMakeMove.
+        if (cell === null) {
+          gameState.board[index] = { player: gameState.currentPlayer, faded: false };
+          if (gameState.currentPlayer === 'X') {
+            gameState.movesX.push(index);
+            updateFading(gameState, 'X');
+          } else {
+            gameState.movesO.push(index);
+            updateFading(gameState, 'O');
+          }
+        } else if (cell.faded && cell.player !== gameState.currentPlayer) {
+          gameState.board[index] = { player: gameState.currentPlayer, faded: false };
+          if (gameState.currentPlayer === 'X') {
+            const pos = gameState.movesO.indexOf(index);
+            if (pos > -1) gameState.movesO.splice(pos, 1);
+            gameState.movesX.push(index);
+            updateFading(gameState, 'X');
+          } else {
+            const pos = gameState.movesX.indexOf(index);
+            if (pos > -1) gameState.movesX.splice(pos, 1);
+            gameState.movesO.push(index);
+            updateFading(gameState, 'O');
+          }
+        }
+      } else {
+        return;
+      }
+      
+      // Switch current player.
+      gameState.currentPlayer = gameState.currentPlayer === 'X' ? 'O' : 'X';
+      // Update status text.
+      statusDiv.textContent = `Current Player: ${gameState.currentPlayer}`;
+      updateCanvas();
+
+      // Check win condition.
+      const winner = checkWin(gameState);
+      if (winner) {
+        statusDiv.textContent = `Player ${winner} wins!`;
+        scores[winner]++;
+        updateScoreBoard();
+        gameState.gameOver = true;
+        playSound(winSound);
+        setTimeout(() => showGameOver(`Player ${winner} wins!`), 1000);
+      } else if (!isSimulation && gameMode === 'ai' && gameState.currentPlayer === 'O') {
+        // Let AI make its move.
+        aiMove();
+      } else if (!isSimulation) {
+        playSound(moveSound);
+      }
+    }
+
+    // Undoes the last move (only available when not in AI mode's turn).
+    function undoMove() {
+      if (moveHistory.length === 0 || (gameMode === 'ai' && gameState.currentPlayer === 'O')) return;
+      gameState = moveHistory.pop();
+      statusDiv.textContent = `Current Player: ${gameState.currentPlayer}`;
+      updateCanvas();
+    }
+
+    // Resets the game state.
+    function resetGame() {
+      gameState = {
+        board: Array(9).fill(null),
+        movesX: [],
+        movesO: [],
+        currentPlayer: 'X',
+        gameOver: false
+      };
+      moveHistory = [];
+      statusDiv.textContent = `Current Player: ${gameState.currentPlayer}`;
+      updateCanvas();
+    }
+
+    /********************************************************************
+     * UI and Canvas Drawing Functions
+     ********************************************************************/
     function drawGrid() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.lineWidth = 4;
-      ctx.strokeStyle = '#333';
+      ctx.strokeStyle = isDarkMode ? '#fff' : '#333';
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
+      ctx.shadowBlur = 5;
+      ctx.shadowOffsetX = 2;
+      ctx.shadowOffsetY = 2;
       ctx.beginPath();
       // Vertical lines
-      ctx.moveTo(100, 0);
-      ctx.lineTo(100, 300);
-      ctx.moveTo(200, 0);
-      ctx.lineTo(200, 300);
+      ctx.moveTo(100, 10);
+      ctx.lineTo(100, 290);
+      ctx.moveTo(200, 10);
+      ctx.lineTo(200, 290);
       // Horizontal lines
-      ctx.moveTo(0, 100);
-      ctx.lineTo(300, 100);
-      ctx.moveTo(0, 200);
-      ctx.lineTo(300, 200);
+      ctx.moveTo(10, 100);
+      ctx.lineTo(290, 100);
+      ctx.moveTo(10, 200);
+      ctx.lineTo(290, 200);
       ctx.stroke();
+      ctx.shadowColor = 'transparent';
     }
 
-    // Draw moves with color, shadows, and fade effects
     function drawMoves() {
       for (let i = 0; i < 9; i++) {
-        const cell = board[i];
+        const cell = gameState.board[i];
         if (cell !== null) {
           const col = i % 3;
           const row = Math.floor(i / 3);
           const centerX = col * 100 + 50;
           const centerY = row * 100 + 50;
           ctx.save();
-          ctx.globalAlpha = cell.faded ? 0.5 : 1.0;
-          ctx.font = 'bold 48px Segoe UI';
+          ctx.globalAlpha = cell.faded ? 0.3 : 1.0;
+          ctx.font = 'bold 60px Segoe UI';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
-          // Modern shadow effect
           ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
           ctx.shadowBlur = 4;
           ctx.shadowOffsetX = 2;
           ctx.shadowOffsetY = 2;
-          ctx.fillStyle = cell.player === 'X' ? '#E74C3C' : '#2ECC71';
+          const gradient = ctx.createLinearGradient(centerX - 25, centerY - 25, centerX + 25, centerY + 25);
+          if (cell.player === 'X') {
+            gradient.addColorStop(0, '#E74C3C');
+            gradient.addColorStop(1, '#C0392B');
+          } else {
+            gradient.addColorStop(0, '#2ECC71');
+            gradient.addColorStop(1, '#27AE60');
+          }
+          ctx.fillStyle = gradient;
           ctx.fillText(cell.player, centerX, centerY);
           ctx.restore();
         }
       }
     }
 
-    // Update canvas by redrawing grid and moves
     function updateCanvas() {
       drawGrid();
       drawMoves();
     }
 
-    // Convert mouse click coordinates to board cell index (0-8)
-    function getCellFromCoordinates(x, y) {
+    function updateScoreBoard() {
+      document.getElementById('scoreX').textContent = scores.X;
+      document.getElementById('scoreO').textContent = scores.O;
+    }
+
+    function showGameOver(message) {
+      const modal = document.getElementById('modeSelection');
+      const content = modal.querySelector('.modal-content');
+      content.innerHTML = `
+        <h2>${message}</h2>
+        <button class="button" onclick="selectMode('${gameMode}')">Play Again</button>
+        <button class="button" onclick="showModeSelection()">Change Mode</button>
+      `;
+      modal.classList.add('active');
+    }
+
+    function showModeSelection() {
+      const modal = document.getElementById('modeSelection');
+      modal.classList.add('active');
+    }
+
+    function showDifficultySelection() {
+      document.getElementById('modeSelection').classList.remove('active');
+      document.getElementById('difficultySelection').classList.add('active');
+    }
+
+    function selectMode(mode) {
+      gameMode = mode;
+      document.getElementById('modeSelection').classList.remove('active');
+      resetGame();
+    }
+
+    function selectDifficulty(level) {
+      difficulty = level;
+      gameMode = 'ai';
+      document.getElementById('difficultySelection').classList.remove('active');
+      resetGame();
+    }
+
+    // Toggle Settings Modal
+    function toggleSettings() {
+      document.getElementById('settingsModal').classList.add('active');
+    }
+    function hideSettings() {
+      document.getElementById('settingsModal').classList.remove('active');
+    }
+    function toggleDarkMode() {
+      isDarkMode = !isDarkMode;
+      document.body.classList.toggle('dark-mode');
+      updateCanvas();
+    }
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      const soundButton = document.querySelector('.sound-toggle');
+      soundButton.textContent = soundEnabled ? '🔊' : '🔇';
+    }
+    function playSound(sound) {
+      if (soundEnabled) {
+        sound.currentTime = 0;
+        sound.play().catch(() => {});
+      }
+    }
+
+    /********************************************************************
+     * AI Move and Event Listeners
+     ********************************************************************/
+    function aiMove() {
+      if (gameState.gameOver) return;
+      const validMoves = getValidMoves(gameState);
+      if (validMoves.length === 0) return;
+      let move;
+      switch (difficulty) {
+        case 'easy':
+          move = validMoves[Math.floor(Math.random() * validMoves.length)];
+          break;
+        case 'medium':
+          if (Math.random() < 0.7) {
+            move = getBestMove();
+          } else {
+            move = validMoves[Math.floor(Math.random() * validMoves.length)];
+          }
+          break;
+        case 'hard':
+          move = getBestMove();
+          break;
+      }
+      setTimeout(() => makeMove(move), 500);
+    }
+
+    // Event listeners for canvas click and touch.
+    canvas.addEventListener('click', (e) => {
       const rect = canvas.getBoundingClientRect();
       const scaleX = canvas.width / rect.width;
       const scaleY = canvas.height / rect.height;
-      const canvasX = (x - rect.left) * scaleX;
-      const canvasY = (y - rect.top) * scaleY;
-      const col = Math.floor(canvasX / 100);
-      const row = Math.floor(canvasY / 100);
-      return row * 3 + col;
-    }
-
-    // Get list of valid moves for AI: empty cells or faded opponent cells
-    function getValidMoves() {
-      let valid = [];
-      for (let i = 0; i < 9; i++) {
-        if (board[i] === null) {
-          valid.push(i);
-        } else if (board[i] && board[i].faded && board[i].player !== currentPlayer) {
-          valid.push(i);
-        }
-      }
-      return valid;
-    }
-
-    // AI move: choose a random valid move
-    function aiMove() {
-      if (gameOver) return;
-      const validMoves = getValidMoves();
-      if (validMoves.length === 0) return;
-      const randomIndex = Math.floor(Math.random() * validMoves.length);
-      const move = validMoves[randomIndex];
-      setTimeout(() => {
-        makeMove(move);
-      }, 500);
-    }
-
-    // Process a move when a cell is clicked or chosen by AI
-    function makeMove(index) {
-      if (gameOver) return; // Disable moves if game is over
-
-      // Process move if cell is empty
-      if (board[index] === null) {
-        board[index] = { player: currentPlayer, faded: false };
-        if (currentPlayer === 'X') {
-          movesX.push(index);
-          // Fade the oldest move on the 3rd move for player X
-          if (movesX.length === 3) {
-            const fadeIndex = movesX[0];
-            if (board[fadeIndex]) board[fadeIndex].faded = true;
-          }
-        } else {
-          movesO.push(index);
-          // Fade the oldest move on the 3rd move for player O
-          if (movesO.length === 3) {
-            const fadeIndex = movesO[0];
-            if (board[fadeIndex]) board[fadeIndex].faded = true;
-          }
-        }
-        // Remove the opponent's faded move if conditions are met
-        if (currentPlayer === 'X' && movesX.length === 3 && movesO.length >= 3) {
-          const fadeIndex = movesO[0];
-          if (board[fadeIndex] && board[fadeIndex].faded) {
-            board[fadeIndex] = null;
-            movesO.shift();
-          }
-        }
-        if (currentPlayer === 'O' && movesO.length === 3 && movesX.length >= 3) {
-          const fadeIndex = movesX[0];
-          if (board[fadeIndex] && board[fadeIndex].faded) {
-            board[fadeIndex] = null;
-            movesX.shift();
-          }
-        }
-        // Switch current player
-        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-        statusDiv.textContent = `Current Player: ${currentPlayer}`;
-        updateCanvas();
-      } else {
-        // Allow capturing of a faded opponent's move
-        if (board[index].faded && board[index].player !== currentPlayer) {
-          const opponent = board[index].player;
-          board[index] = { player: currentPlayer, faded: false };
-          if (opponent === 'X') {
-            const pos = movesX.indexOf(index);
-            if (pos > -1) movesX.splice(pos, 1);
-          } else {
-            const pos = movesO.indexOf(index);
-            if (pos > -1) movesO.splice(pos, 1);
-          }
-          if (currentPlayer === 'X') {
-            movesX.push(index);
-            if (movesX.length === 3) {
-              const fadeIndex = movesX[0];
-              if (board[fadeIndex]) board[fadeIndex].faded = true;
-            }
-          } else {
-            movesO.push(index);
-            if (movesO.length === 3) {
-              const fadeIndex = movesO[0];
-              if (board[fadeIndex]) board[fadeIndex].faded = true;
-            }
-          }
-          currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-          statusDiv.textContent = `Current Player: ${currentPlayer}`;
-          updateCanvas();
-        }
-      }
-
-      // Check for win after each move
-      const winner = checkWin();
-      if (winner) {
-        statusDiv.textContent = `Player ${winner} wins!`;
-        gameOver = true;
-        setTimeout(() => {
-          showModeSelection(`Player ${winner} wins!<br>Select Game Mode:`);
-        }, 1000);
-      } else {
-        // If in AI mode and it's AI's turn, trigger AI move
-        if (!gameOver && gameMode === 'ai' && currentPlayer === 'O') {
-          aiMove();
-        }
-      }
-    }
-
-    // Reset game state and redraw the board
-    function resetGame() {
-      board = Array(9).fill(null);
-      movesX = [];
-      movesO = [];
-      currentPlayer = 'X';
-      gameOver = false;
-      statusDiv.textContent = `Current Player: ${currentPlayer}`;
-      updateCanvas();
-    }
-
-    // Show mode selection modal with a custom message (if provided)
-    function showModeSelection(message) {
-      modeSelectionContent.innerHTML = `<h2>${message || 'Select Game Mode'}</h2>
-        <button id="btnPVP">Play with Player</button>
-        <button id="btnAI">Play with AI</button>`;
-      modeSelection.style.display = 'flex';
-      document.getElementById('btnPVP').addEventListener('click', () => {
-        gameMode = 'pvp';
-        hideModeSelection();
-        resetGame();
-      });
-      document.getElementById('btnAI').addEventListener('click', () => {
-        gameMode = 'ai';
-        hideModeSelection();
-        resetGame();
-      });
-    }
-
-    function hideModeSelection() {
-      modeSelection.style.display = 'none';
-    }
-
-    // Handle canvas click events for human moves
-    canvas.addEventListener('click', (e) => {
-      // In AI mode, only allow human moves when it's human's turn (X)
-      if (gameMode === 'ai' && currentPlayer !== 'X') return;
-      const index = getCellFromCoordinates(e.clientX, e.clientY);
+      const x = (e.clientX - rect.left) * scaleX;
+      const y = (e.clientY - rect.top) * scaleY;
+      const col = Math.floor(x / 100);
+      const row = Math.floor(y / 100);
+      const index = row * 3 + col;
       makeMove(index);
     });
 
-    // Hide the reset button (we use modal for restarting)
-    resetButton.addEventListener('click', resetGame);
+    canvas.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const x = (touch.clientX - rect.left) * scaleX;
+      const y = (touch.clientY - rect.top) * scaleY;
+      const col = Math.floor(x / 100);
+      const row = Math.floor(y / 100);
+      const index = row * 3 + col;
+      makeMove(index);
+    });
 
-    // Initial drawing of the game board
+    // Initialize game on load.
     updateCanvas();
-
-    // Show mode selection modal on page load
     showModeSelection();
   </script>
 </body>
